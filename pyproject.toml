@@ -1,0 +1,16 @@
+[project]
+name = "ha-notion-todo-list"
+version = "0.1.0"
+description = "Home Assistant custom integration exposing filtered Notion databases as todo lists"
+requires-python = ">=3.11"
+dependencies = ["aiohttp>=3.9"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]

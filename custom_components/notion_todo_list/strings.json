@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Notion Todo List",
+        "description": "Create a Home Assistant todo list from a Notion database. filter_json and sorts_json are passed directly to Notion's database query API.",
+        "data": {
+          "access_token": "Notion integration token",
+          "database_id": "Database ID",
+          "list_name": "List name",
+          "title_property": "Title property",
+          "status_property": "Status/done property",
+          "due_property": "Due date property",
+          "description_property": "Description property",
+          "filter_json": "Notion filter JSON",
+          "sorts_json": "Notion sorts JSON",
+          "active_status": "Active status value",
+          "completed_status": "Completed status value"
+        }
+      }
+    },
+    "error": {
+      "auth": "Authentication failed. Check the Notion token and database sharing.",
+      "invalid_json": "Filter or sorts JSON is invalid.",
+      "connection": "Cannot connect to Notion.",
+      "unknown": "Unexpected Notion API error."
+    }
+  }
+}
