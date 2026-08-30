@@ -107,5 +107,7 @@ python3 -m venv .venv
 pip install -e '.[dev]'
 python -m compileall -q custom_components/notion_todo_list
 pytest -q
+# Optional HA runtime smoke tests, with Home Assistant + PHACC installed:
+pytest tests_ha -q
 ruff check .
 ```

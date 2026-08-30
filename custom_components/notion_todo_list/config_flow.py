@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.helpers import selector
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import NotionApiError, NotionAuthError, NotionClient, NotionTodoConfig
 from .const import (
@@ -43,7 +43,7 @@ class NotionTodoListConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 config = _config_from_input(user_input)
-                await NotionClient(async_create_clientsession(self.hass), config).validate()
+                await NotionClient(async_get_clientsession(self.hass), config).validate()
             except ValueError:
                 errors["base"] = "invalid_json"
             except NotionAuthError:

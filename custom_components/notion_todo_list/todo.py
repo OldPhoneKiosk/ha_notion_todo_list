@@ -58,6 +58,7 @@ class NotionDatabaseTodoEntity(CoordinatorEntity[NotionTodoCoordinator], TodoLis
             for item in data
             if not item.completed
         ]
+        self.__dict__.pop("todo_items", None)
         super()._handle_coordinator_update()
 
     async def async_added_to_hass(self) -> None:

@@ -13,10 +13,18 @@ if TYPE_CHECKING:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Notion Todo List from a config entry."""
+    from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+
+    from .api import NotionApiError, NotionAuthError
     from .coordinator import NotionTodoCoordinator
 
     coordinator = NotionTodoCoordinator(hass, entry)
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except NotionAuthError as err:
+        raise ConfigEntryAuthFailed("Notion token or database sharing is invalid") from err
+    except NotionApiError as err:
+        raise ConfigEntryNotReady(str(err)) from err
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
