@@ -40,6 +40,8 @@ class NotionTodoConfig:
     active_status: str = "Not started"
     completed_status: str = "Done"
     update_seconds: int = 300
+    default_properties: dict[str, Any] | None = None
+    # Legacy two-field config remains supported for already-created entries.
     default_property: str | None = None
     default_value: str | None = None
 
@@ -86,6 +88,7 @@ class NotionClient:
             for name in (
                 self.config.due_property,
                 self.config.description_property,
+                *(self.config.default_properties or {}).keys(),
                 self.config.default_property,
             )
             if name and name not in properties
@@ -213,51 +216,68 @@ class NotionClient:
         return {self.config.status_property: {"status": {"name": value}}}
 
     def _default_property_payload(self) -> dict[str, Any]:
-        name = (self.config.default_property or "").strip()
-        value = (self.config.default_value or "").strip()
-        if not name or not value:
-            return {}
+        payload: dict[str, Any] = {}
+        for name, value in (self.config.default_properties or {}).items():
+            name = str(name).strip()
+            if name:
+                payload.update(self._one_default_property_payload(name, value))
+        legacy_name = (self.config.default_property or "").strip()
+        legacy_value = (self.config.default_value or "").strip()
+        if legacy_name and legacy_value and legacy_name not in payload:
+            payload.update(self._one_default_property_payload(legacy_name, legacy_value))
+        return payload
+
+    def _one_default_property_payload(self, name: str, value: Any) -> dict[str, Any]:
         prop_type = self._property_types.get(name)
-        json_value = _json_value(value)
+        if isinstance(value, dict) and prop_type in value:
+            return {name: value}
+        raw_value = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+        text_value = raw_value.strip() if isinstance(raw_value, str) else str(raw_value).strip()
+        json_value = value if not isinstance(value, str) else _json_value(value)
         if isinstance(json_value, dict) and prop_type in json_value:
             return {name: json_value}
         if prop_type == "people":
-            people = json_value if isinstance(json_value, list) else [{"id": value}]
+            people = json_value if isinstance(json_value, list) else [{"id": text_value}]
             return {name: {"people": people}}
         if prop_type == "relation":
-            relation = json_value if isinstance(json_value, list) else [{"id": value}]
+            relation = json_value if isinstance(json_value, list) else [{"id": text_value}]
             return {name: {"relation": relation}}
         if prop_type == "select":
-            select = json_value if isinstance(json_value, dict) else {"name": value}
+            select = json_value if isinstance(json_value, dict) else {"name": text_value}
             return {name: {"select": select}}
         if prop_type == "status":
-            status = json_value if isinstance(json_value, dict) else {"name": value}
+            status = json_value if isinstance(json_value, dict) else {"name": text_value}
             return {name: {"status": status}}
         if prop_type == "multi_select":
             if isinstance(json_value, list):
                 values = json_value
             else:
-                names = [part.strip() for part in value.split(",") if part.strip()]
+                names = [part.strip() for part in text_value.split(",") if part.strip()]
                 values = [{"name": part} for part in names]
             return {name: {"multi_select": values}}
         if prop_type == "checkbox":
-            return {name: {"checkbox": value.lower() in {"1", "true", "yes", "on"}}}
+            if isinstance(value, bool):
+                checked = value
+            else:
+                checked = text_value.lower() in {"1", "true", "yes", "on"}
+            return {name: {"checkbox": checked}}
         if prop_type == "number":
             try:
                 number = float(value)
-            except ValueError as exc:
+            except (TypeError, ValueError) as exc:
                 raise NotionApiError(f"Default value for {name} must be a number") from exc
             return {name: {"number": number}}
         if prop_type == "date":
-            return {name: {"date": {"start": value}}}
+            date_value = json_value if isinstance(json_value, dict) else {"start": text_value}
+            return {name: {"date": date_value}}
         if prop_type == "rich_text":
-            return {name: self._description_payload(value)}
+            return {name: self._description_payload(text_value)}
         if prop_type == "url":
-            return {name: {"url": value}}
+            return {name: {"url": text_value}}
         if prop_type == "email":
-            return {name: {"email": value}}
+            return {name: {"email": text_value}}
         if prop_type == "phone_number":
-            return {name: {"phone_number": value}}
+            return {name: {"phone_number": text_value}}
         raise NotionApiError(f"Default property {name} has unsupported type: {prop_type}")
 
     def _description_payload(self, description: str) -> dict[str, Any]:

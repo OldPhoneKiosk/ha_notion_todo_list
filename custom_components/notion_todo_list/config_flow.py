@@ -16,6 +16,7 @@ from .const import (
     CONF_ACTIVE_STATUS,
     CONF_COMPLETED_STATUS,
     CONF_DATABASE_ID,
+    CONF_DEFAULT_PROPERTIES_JSON,
     CONF_DEFAULT_PROPERTY,
     CONF_DEFAULT_VALUE,
     CONF_DESCRIPTION_PROPERTY,
@@ -159,14 +160,23 @@ def _schema(
                 selector.NumberSelectorConfig(min=15, max=86400, step=1, mode="box")
             ),
             vol.Optional(
-                CONF_DEFAULT_PROPERTY, default=suggested.get(CONF_DEFAULT_PROPERTY, "")
-            ): str,
-            vol.Optional(
-                CONF_DEFAULT_VALUE, default=suggested.get(CONF_DEFAULT_VALUE, "")
+                CONF_DEFAULT_PROPERTIES_JSON,
+                default=_default_properties_json_suggestion(suggested),
             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
         }
     )
     return vol.Schema(fields)
+
+
+def _default_properties_json_suggestion(data: dict[str, Any]) -> str:
+    raw = (data.get(CONF_DEFAULT_PROPERTIES_JSON) or "").strip()
+    if raw:
+        return raw
+    legacy_name = (data.get(CONF_DEFAULT_PROPERTY) or "").strip()
+    legacy_value = data.get(CONF_DEFAULT_VALUE)
+    if not legacy_name or legacy_value in (None, ""):
+        return ""
+    return json.dumps({legacy_name: legacy_value}, ensure_ascii=False)
 
 
 def _entry_config(entry: config_entries.ConfigEntry) -> dict[str, Any]:
@@ -197,6 +207,7 @@ def _positive_int(value: Any, default: int) -> int:
 
 
 def _config_from_input(data: dict[str, Any]) -> NotionTodoConfig:
+    default_properties = _json_or_none(data.get(CONF_DEFAULT_PROPERTIES_JSON), dict)
     return NotionTodoConfig(
         token=data[CONF_ACCESS_TOKEN],
         database_id=data[CONF_DATABASE_ID].strip(),
@@ -209,6 +220,7 @@ def _config_from_input(data: dict[str, Any]) -> NotionTodoConfig:
         active_status=data.get(CONF_ACTIVE_STATUS, DEFAULT_ACTIVE_STATUS).strip(),
         completed_status=data.get(CONF_COMPLETED_STATUS, DEFAULT_COMPLETED_STATUS).strip(),
         update_seconds=_positive_int(data.get(CONF_UPDATE_SECONDS), DEFAULT_UPDATE_SECONDS),
+        default_properties=default_properties,
         default_property=_blank_to_none(data.get(CONF_DEFAULT_PROPERTY)),
         default_value=_blank_to_none(data.get(CONF_DEFAULT_VALUE)),
     )
