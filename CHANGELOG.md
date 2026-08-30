@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 - 2026-08-30
+
+- Treat the default value field as JSON-aware: raw Notion property payloads and JSON arrays/objects can be used for people, relation, select/status, and multi-select defaults.
+- Render the default value field as a multiline text box in Home Assistant Configure.
+
 ## 0.2.0 - 2026-08-30
 
 - Add options flow so existing Notion todo entries can be edited from Home Assistant via Configure.
