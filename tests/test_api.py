@@ -60,6 +60,8 @@ def database_schema(status_type="checkbox"):
             "Done": {"type": status_type},
             "Due": {"type": "date"},
             "Description": {"type": "rich_text"},
+            "Assignee": {"type": "people"},
+            "Priority": {"type": "select"},
         }
     }
 
@@ -125,6 +127,28 @@ async def test_update_uses_status_name_when_database_property_is_status():
     body = session.calls[-1]["json"]
     assert body["properties"]["Done"] == {"status": {"name": "Done"}}
     assert body["properties"]["Name"]["title"][0]["text"]["content"] == "Done task"
+
+
+@pytest.mark.asyncio
+async def test_create_adds_default_people_property():
+    session = FakeSession([database_schema("checkbox"), {}])
+    client = NotionClient(session, cfg(default_property="Assignee", default_value="user-123"))
+
+    await client.create_item("Assigned task")
+
+    body = session.calls[-1]["json"]
+    assert body["properties"]["Assignee"] == {"people": [{"id": "user-123"}]}
+
+
+@pytest.mark.asyncio
+async def test_create_adds_default_select_property():
+    session = FakeSession([database_schema("checkbox"), {}])
+    client = NotionClient(session, cfg(default_property="Priority", default_value="High"))
+
+    await client.create_item("Priority task")
+
+    body = session.calls[-1]["json"]
+    assert body["properties"]["Priority"] == {"select": {"name": "High"}}
 
 
 @pytest.mark.asyncio

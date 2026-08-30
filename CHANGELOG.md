@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 - 2026-08-30
+
+- Add options flow so existing Notion todo entries can be edited from Home Assistant via Configure.
+- Add per-entry Notion polling interval (`update_seconds`).
+- Add optional default property/value for new tasks, including people/Assignee, relation, select/status, multi-select, checkbox, number, date, rich text, URL, email, and phone fields.
+- Reload config entries automatically after options are changed.
+
 ## 0.1.1 - 2026-08-30
 
 - Use Home Assistant's shared aiohttp client in config flow validation.

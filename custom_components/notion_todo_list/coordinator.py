@@ -11,7 +11,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import NotionApiError, NotionClient, NotionTodoConfig, NotionTodoItem
-from .config_flow import _config_from_input
+from .config_flow import _config_from_input, _entry_config
 from .const import DOMAIN
 
 
@@ -20,12 +20,12 @@ class NotionTodoCoordinator(DataUpdateCoordinator[list[NotionTodoItem]]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.entry = entry
-        self.config: NotionTodoConfig = _config_from_input(entry.data)
+        self.config: NotionTodoConfig = _config_from_input(_entry_config(entry))
         self.client = NotionClient(async_get_clientsession(hass), self.config)
         kwargs = {
             "logger": __import__("logging").getLogger(__name__),
             "name": f"{DOMAIN}_{entry.entry_id}",
-            "update_interval": timedelta(minutes=5),
+            "update_interval": timedelta(seconds=self.config.update_seconds),
         }
         if "config_entry" in signature(DataUpdateCoordinator.__init__).parameters:
             kwargs["config_entry"] = entry
