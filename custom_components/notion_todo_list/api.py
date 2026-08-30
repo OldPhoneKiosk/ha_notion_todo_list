@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -217,17 +218,28 @@ class NotionClient:
         if not name or not value:
             return {}
         prop_type = self._property_types.get(name)
+        json_value = _json_value(value)
+        if isinstance(json_value, dict) and prop_type in json_value:
+            return {name: json_value}
         if prop_type == "people":
-            return {name: {"people": [{"id": value}]}}
+            people = json_value if isinstance(json_value, list) else [{"id": value}]
+            return {name: {"people": people}}
         if prop_type == "relation":
-            return {name: {"relation": [{"id": value}]}}
+            relation = json_value if isinstance(json_value, list) else [{"id": value}]
+            return {name: {"relation": relation}}
         if prop_type == "select":
-            return {name: {"select": {"name": value}}}
+            select = json_value if isinstance(json_value, dict) else {"name": value}
+            return {name: {"select": select}}
         if prop_type == "status":
-            return {name: {"status": {"name": value}}}
+            status = json_value if isinstance(json_value, dict) else {"name": value}
+            return {name: {"status": status}}
         if prop_type == "multi_select":
-            names = [part.strip() for part in value.split(",") if part.strip()]
-            return {name: {"multi_select": [{"name": part} for part in names]}}
+            if isinstance(json_value, list):
+                values = json_value
+            else:
+                names = [part.strip() for part in value.split(",") if part.strip()]
+                values = [{"name": part} for part in names]
+            return {name: {"multi_select": values}}
         if prop_type == "checkbox":
             return {name: {"checkbox": value.lower() in {"1", "true", "yes", "on"}}}
         if prop_type == "number":
@@ -264,6 +276,16 @@ class NotionClient:
                 return await resp.json()
         except aiohttp.ClientError as exc:
             raise NotionApiError(str(exc)) from exc
+
+
+def _json_value(raw: str) -> Any | None:
+    raw = raw.strip()
+    if not raw or raw[0] not in '[{"':
+        return None
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return None
 
 
 def _plain_text(prop: dict[str, Any]) -> str:

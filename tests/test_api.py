@@ -141,6 +141,34 @@ async def test_create_adds_default_people_property():
 
 
 @pytest.mark.asyncio
+async def test_create_adds_default_people_property_from_json_array():
+    session = FakeSession([database_schema("checkbox"), {}])
+    client = NotionClient(
+        session,
+        cfg(default_property="Assignee", default_value='[{"id":"user-123"}]'),
+    )
+
+    await client.create_item("Assigned task")
+
+    body = session.calls[-1]["json"]
+    assert body["properties"]["Assignee"] == {"people": [{"id": "user-123"}]}
+
+
+@pytest.mark.asyncio
+async def test_create_accepts_raw_default_property_payload_json():
+    session = FakeSession([database_schema("checkbox"), {}])
+    client = NotionClient(
+        session,
+        cfg(default_property="Priority", default_value='{"select":{"name":"High"}}'),
+    )
+
+    await client.create_item("Priority task")
+
+    body = session.calls[-1]["json"]
+    assert body["properties"]["Priority"] == {"select": {"name": "High"}}
+
+
+@pytest.mark.asyncio
 async def test_create_adds_default_select_property():
     session = FakeSession([database_schema("checkbox"), {}])
     client = NotionClient(session, cfg(default_property="Priority", default_value="High"))

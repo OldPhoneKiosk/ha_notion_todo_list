@@ -161,7 +161,9 @@ def _schema(
             vol.Optional(
                 CONF_DEFAULT_PROPERTY, default=suggested.get(CONF_DEFAULT_PROPERTY, "")
             ): str,
-            vol.Optional(CONF_DEFAULT_VALUE, default=suggested.get(CONF_DEFAULT_VALUE, "")): str,
+            vol.Optional(
+                CONF_DEFAULT_VALUE, default=suggested.get(CONF_DEFAULT_VALUE, "")
+            ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
         }
     )
     return vol.Schema(fields)
