@@ -15,7 +15,15 @@
           "filter_json": "Notion filter JSON",
           "sorts_json": "Notion sorts JSON",
           "active_status": "Active status value",
-          "completed_status": "Completed status value"
+          "completed_status": "Completed status value",
+          "update_seconds": "Refresh every seconds",
+          "default_property": "Default property for new tasks",
+          "default_value": "Default value for new tasks"
+        },
+        "data_description": {
+          "update_seconds": "How often Home Assistant polls Notion for this list. Minimum 15 seconds.",
+          "default_property": "Optional Notion property name to set on every new task, for example Assignee, Owner, Priority, Project.",
+          "default_value": "Value for that property. For people/relation fields use the Notion user/page ID; for select/status use the option name."
         }
       }
     },
@@ -24,6 +32,34 @@
       "invalid_json": "Filter or sorts JSON is invalid.",
       "connection": "Cannot connect to Notion.",
       "unknown": "Unexpected Notion API error."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit Notion Todo List",
+        "description": "Edit polling, property names, filters/sorts, and defaults for newly created tasks. To change Database ID, add a new integration entry.",
+        "data": {
+          "access_token": "Notion integration token",
+          "list_name": "List name",
+          "title_property": "Title property",
+          "status_property": "Status/done property",
+          "due_property": "Due date property",
+          "description_property": "Description property",
+          "filter_json": "Notion filter JSON",
+          "sorts_json": "Notion sorts JSON",
+          "active_status": "Active status value",
+          "completed_status": "Completed status value",
+          "update_seconds": "Refresh every seconds",
+          "default_property": "Default property for new tasks",
+          "default_value": "Default value for new tasks"
+        },
+        "data_description": {
+          "update_seconds": "How often Home Assistant polls Notion for this list. Minimum 15 seconds.",
+          "default_property": "Optional Notion property name to set on every new task, for example Assignee, Owner, Priority, Project.",
+          "default_value": "Value for that property. For people/relation fields use the Notion user/page ID; for select/status use the option name."
+        }
+      }
     }
   }
 }

@@ -12,6 +12,8 @@ from custom_components.notion_todo_list.const import (
     CONF_ACTIVE_STATUS,
     CONF_COMPLETED_STATUS,
     CONF_DATABASE_ID,
+    CONF_DEFAULT_PROPERTY,
+    CONF_DEFAULT_VALUE,
     CONF_DESCRIPTION_PROPERTY,
     CONF_DUE_PROPERTY,
     CONF_FILTER_JSON,
@@ -19,6 +21,7 @@ from custom_components.notion_todo_list.const import (
     CONF_SORTS_JSON,
     CONF_STATUS_PROPERTY,
     CONF_TITLE_PROPERTY,
+    CONF_UPDATE_SECONDS,
     DOMAIN,
 )
 
@@ -65,6 +68,9 @@ def _valid_input() -> dict[str, str]:
         CONF_SORTS_JSON: '[{"property":"Due","direction":"ascending"}]',
         CONF_ACTIVE_STATUS: "false",
         CONF_COMPLETED_STATUS: "true",
+        CONF_UPDATE_SECONDS: "45",
+        CONF_DEFAULT_PROPERTY: "Assignee",
+        CONF_DEFAULT_VALUE: "user-123",
     }
 
 
@@ -77,6 +83,7 @@ async def test_config_flow_validates_database_with_shared_ha_session(hass: HomeA
                     "Done": {"type": "checkbox"},
                     "Due": {"type": "date"},
                     "Description": {"type": "rich_text"},
+                    "Assignee": {"type": "people"},
                 }
             }
         ]
@@ -93,6 +100,46 @@ async def test_config_flow_validates_database_with_shared_ha_session(hass: HomeA
     assert result["title"] == "Notion Tasks"
     assert session.calls[0]["method"] == "GET"
     assert session.calls[0]["url"].endswith("/databases/db1")
+
+
+async def test_options_flow_updates_existing_entry(hass: HomeAssistant):
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    data = _valid_input()
+    entry = MockConfigEntry(domain=DOMAIN, title="Notion Tasks", data=data)
+    entry.add_to_hass(hass)
+    session = _FakeSession(
+        [
+            {
+                "properties": {
+                    "Name": {"type": "title"},
+                    "Done": {"type": "checkbox"},
+                    "Due": {"type": "date"},
+                    "Description": {"type": "rich_text"},
+                    "Assignee": {"type": "people"},
+                }
+            }
+        ]
+    )
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
+
+    updated = {key: value for key, value in data.items() if key != CONF_DATABASE_ID} | {
+        CONF_UPDATE_SECONDS: 30,
+        CONF_DEFAULT_VALUE: "user-456",
+    }
+    with patch(
+        "custom_components.notion_todo_list.config_flow.async_get_clientsession",
+        return_value=session,
+    ):
+        result = await hass.config_entries.options.async_configure(
+            result["flow_id"], user_input=updated
+        )
+
+    assert result["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    assert result["data"][CONF_UPDATE_SECONDS] == 30
+    assert result["data"][CONF_DEFAULT_VALUE] == "user-456"
 
 
 async def test_todo_entity_rebuilds_cached_todo_items_after_refresh(hass: HomeAssistant):

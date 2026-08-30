@@ -38,6 +38,9 @@ class NotionTodoConfig:
     sorts_obj: list[dict[str, Any]] | None = None
     active_status: str = "Not started"
     completed_status: str = "Done"
+    update_seconds: int = 300
+    default_property: str | None = None
+    default_value: str | None = None
 
 
 @dataclass(slots=True)
@@ -58,6 +61,7 @@ class NotionClient:
         self._session = session
         self.config = config
         self._status_property_type: str | None = None
+        self._property_types: dict[str, str] = {}
 
     @property
     def headers(self) -> dict[str, str]:
@@ -78,7 +82,11 @@ class NotionClient:
         ]
         optional_missing = [
             name
-            for name in (self.config.due_property, self.config.description_property)
+            for name in (
+                self.config.due_property,
+                self.config.description_property,
+                self.config.default_property,
+            )
             if name and name not in properties
         ]
         if missing or optional_missing:
@@ -86,6 +94,9 @@ class NotionClient:
                 "Missing Notion database properties: " + ", ".join(missing + optional_missing)
             )
         self._status_property_type = properties[self.config.status_property].get("type")
+        self._property_types = {
+            name: str(schema.get("type") or "") for name, schema in properties.items()
+        }
 
     async def _ensure_schema(self) -> None:
         if self._status_property_type is None:
@@ -125,6 +136,7 @@ class NotionClient:
             properties[self.config.due_property] = {"date": {"start": due.isoformat()}}
         if description is not None and self.config.description_property:
             properties[self.config.description_property] = self._description_payload(description)
+        properties.update(self._default_property_payload())
         await self._request(
             "POST",
             "/pages",
@@ -198,6 +210,43 @@ class NotionClient:
         if prop_type == "select":
             return {self.config.status_property: {"select": {"name": value}}}
         return {self.config.status_property: {"status": {"name": value}}}
+
+    def _default_property_payload(self) -> dict[str, Any]:
+        name = (self.config.default_property or "").strip()
+        value = (self.config.default_value or "").strip()
+        if not name or not value:
+            return {}
+        prop_type = self._property_types.get(name)
+        if prop_type == "people":
+            return {name: {"people": [{"id": value}]}}
+        if prop_type == "relation":
+            return {name: {"relation": [{"id": value}]}}
+        if prop_type == "select":
+            return {name: {"select": {"name": value}}}
+        if prop_type == "status":
+            return {name: {"status": {"name": value}}}
+        if prop_type == "multi_select":
+            names = [part.strip() for part in value.split(",") if part.strip()]
+            return {name: {"multi_select": [{"name": part} for part in names]}}
+        if prop_type == "checkbox":
+            return {name: {"checkbox": value.lower() in {"1", "true", "yes", "on"}}}
+        if prop_type == "number":
+            try:
+                number = float(value)
+            except ValueError as exc:
+                raise NotionApiError(f"Default value for {name} must be a number") from exc
+            return {name: {"number": number}}
+        if prop_type == "date":
+            return {name: {"date": {"start": value}}}
+        if prop_type == "rich_text":
+            return {name: self._description_payload(value)}
+        if prop_type == "url":
+            return {name: {"url": value}}
+        if prop_type == "email":
+            return {name: {"email": value}}
+        if prop_type == "phone_number":
+            return {name: {"phone_number": value}}
+        raise NotionApiError(f"Default property {name} has unsupported type: {prop_type}")
 
     def _description_payload(self, description: str) -> dict[str, Any]:
         return {"rich_text": [{"type": "text", "text": {"content": description}}]}
