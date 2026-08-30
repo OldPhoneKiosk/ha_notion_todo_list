@@ -16,6 +16,8 @@ CONF_LIST_NAME = "list_name"
 CONF_ACTIVE_STATUS = "active_status"
 CONF_COMPLETED_STATUS = "completed_status"
 CONF_UPDATE_SECONDS = "update_seconds"
+CONF_DEFAULT_PROPERTIES_JSON = "default_properties_json"
+# Legacy option keys retained so existing entries are migrated/read safely.
 CONF_DEFAULT_PROPERTY = "default_property"
 CONF_DEFAULT_VALUE = "default_value"
 

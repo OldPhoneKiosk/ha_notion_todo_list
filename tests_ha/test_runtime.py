@@ -12,8 +12,7 @@ from custom_components.notion_todo_list.const import (
     CONF_ACTIVE_STATUS,
     CONF_COMPLETED_STATUS,
     CONF_DATABASE_ID,
-    CONF_DEFAULT_PROPERTY,
-    CONF_DEFAULT_VALUE,
+    CONF_DEFAULT_PROPERTIES_JSON,
     CONF_DESCRIPTION_PROPERTY,
     CONF_DUE_PROPERTY,
     CONF_FILTER_JSON,
@@ -69,8 +68,7 @@ def _valid_input() -> dict[str, str]:
         CONF_ACTIVE_STATUS: "false",
         CONF_COMPLETED_STATUS: "true",
         CONF_UPDATE_SECONDS: "45",
-        CONF_DEFAULT_PROPERTY: "Assignee",
-        CONF_DEFAULT_VALUE: "user-123",
+        CONF_DEFAULT_PROPERTIES_JSON: '{"Assignee":[{"id":"user-123"}]}',
     }
 
 
@@ -127,7 +125,7 @@ async def test_options_flow_updates_existing_entry(hass: HomeAssistant):
 
     updated = {key: value for key, value in data.items() if key != CONF_DATABASE_ID} | {
         CONF_UPDATE_SECONDS: 30,
-        CONF_DEFAULT_VALUE: "user-456",
+        CONF_DEFAULT_PROPERTIES_JSON: '{"Assignee":[{"id":"user-456"}]}',
     }
     with patch(
         "custom_components.notion_todo_list.config_flow.async_get_clientsession",
@@ -139,7 +137,7 @@ async def test_options_flow_updates_existing_entry(hass: HomeAssistant):
 
     assert result["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
     assert result["data"][CONF_UPDATE_SECONDS] == 30
-    assert result["data"][CONF_DEFAULT_VALUE] == "user-456"
+    assert result["data"][CONF_DEFAULT_PROPERTIES_JSON] == '{"Assignee":[{"id":"user-456"}]}'
 
 
 async def test_todo_entity_rebuilds_cached_todo_items_after_refresh(hass: HomeAssistant):

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2 - 2026-08-30
+
+- Replace the two default property/value fields with one JSON field: `default_properties_json`.
+- Keep legacy two-field entries working while rendering new and migrated defaults as a single JSON object in Home Assistant.
+
 ## 0.2.1 - 2026-08-30
 
 - Treat the default value field as JSON-aware: raw Notion property payloads and JSON arrays/objects can be used for people, relation, select/status, and multi-select defaults.

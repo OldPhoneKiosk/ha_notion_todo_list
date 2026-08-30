@@ -17,13 +17,11 @@
           "active_status": "Active status value",
           "completed_status": "Completed status value",
           "update_seconds": "Refresh every seconds",
-          "default_property": "Default property for new tasks",
-          "default_value": "Default value for new tasks"
+          "default_properties_json": "Default properties JSON for new tasks"
         },
         "data_description": {
           "update_seconds": "How often Home Assistant polls Notion for this list. Minimum 15 seconds.",
-          "default_property": "Optional Notion property name to set on every new task, for example Assignee, Owner, Priority, Project.",
-          "default_value": "Value for that property. For people/relation fields use the Notion user/page ID; for select/status use the option name."
+          "default_properties_json": "Optional JSON object of Notion defaults to set on every new task, for example {\"Assignee\":[{\"id\":\"USER_ID\"}],\"Priority\":\"High\"}. Values may be simple strings/lists or full Notion property payloads."
         }
       }
     },
@@ -51,13 +49,11 @@
           "active_status": "Active status value",
           "completed_status": "Completed status value",
           "update_seconds": "Refresh every seconds",
-          "default_property": "Default property for new tasks",
-          "default_value": "Default value for new tasks"
+          "default_properties_json": "Default properties JSON for new tasks"
         },
         "data_description": {
           "update_seconds": "How often Home Assistant polls Notion for this list. Minimum 15 seconds.",
-          "default_property": "Optional Notion property name to set on every new task, for example Assignee, Owner, Priority, Project.",
-          "default_value": "Value for that property. For people/relation fields use the Notion user/page ID; for select/status use the option name."
+          "default_properties_json": "Optional JSON object of Notion defaults to set on every new task, for example {\"Assignee\":[{\"id\":\"USER_ID\"}],\"Priority\":\"High\"}. Values may be simple strings/lists or full Notion property payloads."
         }
       }
     }

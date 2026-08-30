@@ -130,6 +130,21 @@ async def test_update_uses_status_name_when_database_property_is_status():
 
 
 @pytest.mark.asyncio
+async def test_create_adds_default_properties_from_single_json_field():
+    session = FakeSession([database_schema("checkbox"), {}])
+    client = NotionClient(
+        session,
+        cfg(default_properties={"Assignee": [{"id": "user-123"}], "Priority": "High"}),
+    )
+
+    await client.create_item("Assigned task")
+
+    body = session.calls[-1]["json"]
+    assert body["properties"]["Assignee"] == {"people": [{"id": "user-123"}]}
+    assert body["properties"]["Priority"] == {"select": {"name": "High"}}
+
+
+@pytest.mark.asyncio
 async def test_create_adds_default_people_property():
     session = FakeSession([database_schema("checkbox"), {}])
     client = NotionClient(session, cfg(default_property="Assignee", default_value="user-123"))
