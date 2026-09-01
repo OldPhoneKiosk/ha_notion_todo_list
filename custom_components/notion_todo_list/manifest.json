@@ -4,8 +4,9 @@
   "codeowners": ["@OldPhoneKiosk"],
   "config_flow": true,
   "documentation": "https://github.com/OldPhoneKiosk/ha_notion_todo_list",
+  "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/OldPhoneKiosk/ha_notion_todo_list/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
