@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0 - 2026-09-01
+
+- Mark Notion Todo List as the first stable HACS release.
+- Keep HACS metadata configured for release/tag source downloads.
+- Add official Notion branding icons for HACS/README display.
+
 ## 0.2.2 - 2026-08-30
 
 - Replace the two default property/value fields with one JSON field: `default_properties_json`.
