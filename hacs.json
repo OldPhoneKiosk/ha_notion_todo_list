@@ -1,4 +1,7 @@
 {
   "name": "Notion Todo List",
-  "render_readme": true
+  "content_in_root": false,
+  "render_readme": true,
+  "hide_default_branch": true,
+  "homeassistant": "2025.6.0"
 }
