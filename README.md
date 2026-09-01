@@ -1,5 +1,9 @@
 # Notion Todo List for Home Assistant
 
+<p align="center">
+  <img src="icon.png" alt="Notion Todo List icon" width="128" height="128">
+</p>
+
 Public Home Assistant custom integration that exposes a filtered Notion **database** as a native HA `todo` entity.
 
 This is intended for setups like OldPhoneKiosk where Home Assistant is the source of truth and the phone/tablet only consumes a HA `todo.*` list.
