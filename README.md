@@ -4,9 +4,22 @@
   <img src="icon.png" alt="Notion Todo List icon" width="128" height="128">
 </p>
 
+[![Open your Home Assistant instance and add this repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=OldPhoneKiosk&repository=ha_notion_todo_list&category=integration)
+[![CI](https://github.com/OldPhoneKiosk/ha_notion_todo_list/actions/workflows/ci.yml/badge.svg)](https://github.com/OldPhoneKiosk/ha_notion_todo_list/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/OldPhoneKiosk/ha_notion_todo_list?label=HACS%20release)](https://github.com/OldPhoneKiosk/ha_notion_todo_list/releases/latest)
+![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2025.6%2B-41BDF5)
+
 Public Home Assistant custom integration that exposes a filtered Notion **database** as a native HA `todo` entity.
 
 This is intended for setups like OldPhoneKiosk where Home Assistant is the source of truth and the phone/tablet only consumes a HA `todo.*` list.
+
+## At a glance
+
+- **Install method:** HACS custom repository using normal release/tag source downloads; no ZIP asset is required.
+- **Minimum Home Assistant:** 2025.6.0.
+- **Branding:** official Notion icon in `icon.png` and `custom_components/notion_todo_list/icon.png`.
+- **Entity model:** one filtered Notion database exposed as a native Home Assistant `todo.*` entity.
+- **Automation fit:** use Notion database filters/sorts and HA automations while keeping Notion credentials inside Home Assistant.
 
 ## Features
 
@@ -23,7 +36,8 @@ This is intended for setups like OldPhoneKiosk where Home Assistant is the sourc
 
 [![Open your Home Assistant instance and add this repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=OldPhoneKiosk&repository=ha_notion_todo_list&category=integration)
 
-1. Add this repository to HACS as an integration repository.
+1. Click the HACS badge at the top of this README, or add this repository manually in HACS.
+   HACS installs this repository from the selected release/tag source archive; this project intentionally does not require a separate ZIP asset.
 2. Download **Notion Todo List**.
 3. Restart Home Assistant.
 4. Add integration: **Settings → Devices & services → Add integration → Notion Todo List**.
